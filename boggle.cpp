@@ -95,17 +95,26 @@ bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>
                   const std::vector<std::vector<char> >& board, std::string word,
                   std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
-    if (r >= board.size() || c >= board[0].size()) return false;
+    std::string current = word;
+    std::string longestWord = "";
 
-    word += board[r][c];
-    if (prefix.find(word) == prefix.end()) return false;
+    while (r < board.size() && c < board[0].size()) {
+        current += board[r][c];
 
-    bool longer = boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
-    
-    if (!longer && dict.find(word) != dict.end()) {
-        result.insert(word);
+        if (dict.find(current) != dict.end() && current.length() > longestWord.length()) {
+            longestWord = current;
+        }
+
+        if (prefix.find(current) == prefix.end()) break;
+
+        r += dr;
+        c += dc;
+    }
+
+    if (!longestWord.empty()) {
+        result.insert(longestWord);
         return true;
     }
 
-    return longer || dict.find(word) != dict.end();
+    return false;
 }
