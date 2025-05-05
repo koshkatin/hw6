@@ -91,9 +91,32 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 	return result;
 }
 
-bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, const std::vector<std::vector<char> >& board, 
-								   std::string word, std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
+bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, 
+				  const std::vector<std::vector<char> >& board, std::string word, 
+				  std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
 //add your solution here!
+	// Base case: Out of bounds
+    if (r >= board.size() || c >= board[0].size()) {
+        return false;
+    }
 
+    // Add the current letter to the word
+    word += board[r][c];
+
+    // If the word is not a prefix, stop searching
+    if (prefix.find(word) == prefix.end()) {
+        return false;
+    }
+
+    // If the word is in the dictionary, add it to the result set
+    if (dict.find(word) != dict.end()) {
+        result.insert(word);
+    }
+
+    // Recurse to the next position in the specified direction
+    bool found = boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
+
+    // Return true if a valid word was found along this path
+    return found || dict.find(word) != dict.end();
 }
