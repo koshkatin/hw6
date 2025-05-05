@@ -66,7 +66,7 @@ std::pair<std::set<std::string>, std::set<std::string> > parseDict(std::string f
 	while(dictfs >> word)
 	{
 		dict.insert(word);
-		for(unsigned int i=word.size()-1;i>=1;i--)
+		for(int i=word.size()-1; i>=1; --i)
 		{
 			prefix.insert(word.substr(0,i));
 		}
@@ -91,29 +91,21 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 	return result;
 }
 
-bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix, 
-				  const std::vector<std::vector<char> >& board, std::string word, 
-				  std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
+bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix,
+                  const std::vector<std::vector<char> >& board, std::string word,
+                  std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
 {
-    if (r >= board.size() || c >= board[0].size()) {
-        return false;
-    }
+    if (r >= board.size() || c >= board[0].size()) return false;
 
     word += board[r][c];
+    if (prefix.find(word) == prefix.end()) return false;
 
-    // If not a prefix, prune search
-    if (prefix.find(word) == prefix.end()) {
-        return false;
-    }
-
-    // Recurse to next cell
-    bool longerFound = boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
-
-    // Insert only if it's a dictionary word and no longer word was found along the path
-    if (!longerFound && dict.find(word) != dict.end()) {
+    bool longer = boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
+    
+    if (!longer && dict.find(word) != dict.end()) {
         result.insert(word);
+        return true;
     }
 
-    // Return true if this word is a dictionary word or a longer one was found later
-    return longerFound || dict.find(word) != dict.end();
+    return longer || dict.find(word) != dict.end();
 }
