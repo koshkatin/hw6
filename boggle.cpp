@@ -91,45 +91,29 @@ std::set<std::string> boggle(const std::set<std::string>& dict, const std::set<s
 	return result;
 }
 
-bool boggleHelper(const std::set<std::string>& dict, const std::set<std::string>& prefix,
-                  const std::vector<std::vector<char>>& board, std::string word,
-                  std::set<std::string>& result, unsigned int r, unsigned int c, int dr, int dc)
+bool boggleHelper(const std::set<std::string>& dict,
+                  const std::set<std::string>& prefix,
+                  const std::vector<std::vector<char>>& board,
+                  std::string word,
+                  std::set<std::string>& result,
+                  unsigned int r, unsigned int c,
+                  int dr, int dc)
 {
-    // static so they persist across recursive calls
-	static std::vector<std::vector<bool>> visited;
-    static bool initialized = false;
-	static std::string longest = "";
+    if (r >= board.size() || c >= board[0].size()) return false;
 
-    unsigned int n = board.size();
-    if (!initialized) {
-        visited.assign(n, std::vector<bool>(n, false));
-        initialized = true;
-    }
+    word += board[r][c];
 
-	// If out of bounds or revisiting a cell, stop the recursion; invalid path.
-    if (r >= n || c >= n || visited[r][c]) return false;
+	if (prefix.find(word) == prefix.end() && dict.find(word) == dict.end()) return false;
 
-    word += board[r][c]; // Append current cell’s letter to word
-	// If no word in the dictionary starts with word, stop
-    if (prefix.find(word) == prefix.end()) return false;
+    // Recursively go deeper
+    std::string longest = "";
+    bool deeper_found = boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
 
-    visited[r][c] = true;
-    // track longest valid word
-    if (word.length() >= 2 && dict.find(word) != dict.end() && word.length() > longest.length()) {
-        longest = word;
-    }
-
-    // recurse forward in the same direction
-    boggleHelper(dict, prefix, board, word, result, r + dr, c + dc, dr, dc);
-
-    visited[r][c] = false;
-
-    // insert longest word once at top level of search path
-    if (word.length() == 1 && !longest.empty()) {
-        result.insert(longest);
-        longest = ""; // reset for next path
+    if (!deeper_found && dict.find(word) != dict.end()) {
+        // This is the deepest valid word in this direction
+        result.insert(word);
         return true;
     }
 
-    return false;
+    return deeper_found;
 }
